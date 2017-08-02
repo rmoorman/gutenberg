@@ -10,6 +10,7 @@ import { includes } from 'lodash';
 import { __, sprintf } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
 import { Button, Placeholder, Spinner, SandBox } from '@wordpress/components';
+import { query } from '@wordpress/block-api';
 // TODO: This is a circular dependency between editor and blocks. This must be
 // updated, eventually to depend on published `@wordpress/url`
 import { addQueryArgs } from '../../../editor/utils/url';
@@ -18,7 +19,7 @@ import { addQueryArgs } from '../../../editor/utils/url';
  * Internal dependencies
  */
 import './style.scss';
-import { registerBlockType, query } from '../../api';
+import { registerBlockType } from '../../api';
 import Editable from '../../editable';
 import BlockControls from '../../block-controls';
 import BlockAlignmentToolbar from '../../block-alignment-toolbar';

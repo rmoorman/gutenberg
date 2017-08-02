@@ -5,11 +5,6 @@ import { shallow } from 'enzyme';
 import { noop } from 'lodash';
 
 /**
- * WordPress dependencies
- */
-import { registerBlockType, unregisterBlockType, getBlockTypes } from '@wordpress/blocks';
-
-/**
  * Internal dependencies
  */
 import { InserterMenu, searchBlocks } from '../menu';
@@ -64,27 +59,23 @@ const textEmbedBlock = {
 	category: 'embed',
 };
 
+const editorSettings = {
+	blockTypes: [
+		textBlock,
+		advancedTextBlock,
+		someOtherBlock,
+		moreBlock,
+		youtubeBlock,
+		textEmbedBlock,
+	],
+	categories: [
+		{ slug: 'common', title: 'Common Blocks' },
+		{ slug: 'layout', title: 'Layout Blocks' },
+		{ slug: 'embed', title: 'Embed' },
+	],
+};
+
 describe( 'InserterMenu', () => {
-	const unregisterAllBlocks = () => {
-		getBlockTypes().forEach( ( block ) => {
-			unregisterBlockType( block.name );
-		} );
-	};
-
-	afterEach( () => {
-		unregisterAllBlocks();
-	} );
-
-	beforeEach( () => {
-		unregisterAllBlocks();
-		registerBlockType( textBlock.name, textBlock );
-		registerBlockType( advancedTextBlock.name, advancedTextBlock );
-		registerBlockType( someOtherBlock.name, someOtherBlock );
-		registerBlockType( moreBlock.name, moreBlock );
-		registerBlockType( youtubeBlock.name, youtubeBlock );
-		registerBlockType( textEmbedBlock.name, textEmbedBlock );
-	} );
-
 	it( 'should show the recent tab by default', () => {
 		const wrapper = shallow(
 			<InserterMenu
@@ -92,6 +83,7 @@ describe( 'InserterMenu', () => {
 				blocks={ [] }
 				recentlyUsedBlocks={ [] }
 				debouncedSpeak={ noop }
+				settings={ editorSettings }
 			/>
 		);
 
@@ -109,6 +101,7 @@ describe( 'InserterMenu', () => {
 				blocks={ [] }
 				recentlyUsedBlocks={ [ advancedTextBlock ] }
 				debouncedSpeak={ noop }
+				settings={ editorSettings }
 			/>
 		);
 
@@ -125,6 +118,7 @@ describe( 'InserterMenu', () => {
 				blocks={ [] }
 				recentlyUsedBlocks={ [] }
 				debouncedSpeak={ noop }
+				settings={ editorSettings }
 			/>
 		);
 		const embedTab = wrapper.find( '.editor-inserter__tab' )
@@ -147,6 +141,7 @@ describe( 'InserterMenu', () => {
 				blocks={ [] }
 				recentlyUsedBlocks={ [] }
 				debouncedSpeak={ noop }
+				settings={ editorSettings }
 			/>
 		);
 		const blocksTab = wrapper.find( '.editor-inserter__tab' )
@@ -171,6 +166,7 @@ describe( 'InserterMenu', () => {
 				blocks={ [ { name: moreBlock.name } ] }
 				recentlyUsedBlocks={ [] }
 				debouncedSpeak={ noop }
+				settings={ editorSettings }
 			/>
 		);
 		const blocksTab = wrapper.find( '.editor-inserter__tab' )
@@ -189,6 +185,7 @@ describe( 'InserterMenu', () => {
 				blocks={ [] }
 				recentlyUsedBlocks={ [] }
 				debouncedSpeak={ noop }
+				settings={ editorSettings }
 			/>
 		);
 		wrapper.setState( { filterValue: 'text' } );
@@ -210,6 +207,7 @@ describe( 'InserterMenu', () => {
 				blocks={ [] }
 				recentlyUsedBlocks={ [] }
 				debouncedSpeak={ noop }
+				settings={ editorSettings }
 			/>
 		);
 		wrapper.setState( { filterValue: ' text' } );

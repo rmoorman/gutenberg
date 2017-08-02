@@ -8,9 +8,9 @@ import { pickBy } from 'lodash';
  * Internal dependencies
  */
 import { parse as grammarParse } from './post.pegjs';
-import { getBlockType, getUnknownTypeHandler } from './registration';
 import { createBlock } from './factory';
-import { getBeautifulContent, getSaveContent } from './serializer';
+import { isValidBlock } from './validator';
+import { getBlockType } from './config';
 
 /**
  * Returns the block attributes parsed from raw content.
@@ -63,14 +63,15 @@ export function getBlockAttributes( blockType, rawContent, attributes ) {
 /**
  * Creates a block with fallback to the unknown type handler.
  *
- * @param  {?String} name       Block type name
- * @param  {String}  rawContent Raw block content
- * @param  {?Object} attributes Attributes obtained from block delimiters
- * @return {?Object}            An initialized block object (if possible)
+ * @param  {?String} originalName Block type name
+ * @param  {String}  rawContent   Raw block content
+ * @param  {?Object} attributes   Attributes obtained from block delimiters
+ * @param  {Object}  config       Block Types config
+ * @return {?Object}              An initialized block object (if possible)
  */
-export function createBlockWithFallback( name, rawContent, attributes ) {
+export function createBlockWithFallback( originalName, rawContent, attributes, config ) {
 	// Use type from block content, otherwise find unknown handler.
-	name = name || getUnknownTypeHandler();
+	let name = originalName || config.fallbackBlockName;
 
 	// Convert 'core/text' blocks in existing content to the new
 	// 'core/paragraph'.
@@ -79,21 +80,20 @@ export function createBlockWithFallback( name, rawContent, attributes ) {
 	}
 
 	// Try finding type for known block name, else fall back again.
-	let blockType = getBlockType( name );
-	const fallbackBlock = getUnknownTypeHandler();
+	let blockType = getBlockType( name, config );
 	if ( ! blockType ) {
-		name = fallbackBlock;
-		blockType = getBlockType( name );
+		name = config.fallbackBlockName;
+		blockType = getBlockType( name, config );
 	}
 
 	// Include in set only if type were determined.
 	// TODO do we ever expect there to not be an unknown type handler?
-	if ( blockType && ( rawContent || name !== fallbackBlock ) ) {
+	if ( blockType && ( rawContent || name !== config.fallbackBlockName ) ) {
 		// TODO allow blocks to opt-in to receiving a tree instead of a string.
 		// Gradually convert all blocks to this new format, then remove the
 		// string serialization.
 		const block = createBlock(
-			name,
+			blockType,
 			getBlockAttributes( blockType, rawContent, attributes )
 		);
 
@@ -110,47 +110,16 @@ export function createBlockWithFallback( name, rawContent, attributes ) {
 }
 
 /**
- * Returns true if the parsed block is valid given the input content. A block
- * is considered valid if, when serialized with assumed attributes, the content
- * matches the original value.
- *
- * Logs to console in development environments when invalid.
- *
- * @param  {String}  rawContent Original block content
- * @param  {String}  blockType  Block type
- * @param  {Object}  attributes Parsed block attributes
- * @return {Boolean}            Whether block is valid
- */
-export function isValidBlock( rawContent, blockType, attributes ) {
-	const [ actual, expected ] = [
-		rawContent,
-		getSaveContent( blockType, attributes ),
-	].map( getBeautifulContent );
-
-	const isValid = ( actual === expected );
-
-	if ( ! isValid && 'development' === process.env.NODE_ENV ) {
-		// eslint-disable-next-line no-console
-		console.error(
-			'Invalid block parse\n' +
-				'\tExpected: ' + expected + '\n' +
-				'\tActual:   ' + actual
-		);
-	}
-
-	return isValid;
-}
-
-/**
  * Parses the post content with a PegJS grammar and returns a list of blocks.
  *
  * @param  {String} content The post content
+ * @param  {Object} config  Block Types config
  * @return {Array}          Block list
  */
-export function parseWithGrammar( content ) {
+export function parse( content, config ) {
 	return grammarParse( content ).reduce( ( memo, blockNode ) => {
 		const { blockName, rawContent, attrs } = blockNode;
-		const block = createBlockWithFallback( blockName, rawContent.trim(), attrs );
+		const block = createBlockWithFallback( blockName, rawContent.trim(), attrs, config );
 		if ( block ) {
 			memo.push( block );
 		}
@@ -158,4 +127,4 @@ export function parseWithGrammar( content ) {
 	}, [] );
 }
 
-export default parseWithGrammar;
+export default parse;

@@ -12,16 +12,9 @@ import serialize, {
 	getSaveContent,
 	serializeAttributes,
 } from '../serializer';
-import { getBlockTypes, registerBlockType, unregisterBlockType } from '../registration';
-import { createBlock } from '../';
+import { createBlock } from '../factory';
 
 describe( 'block serializer', () => {
-	afterEach( () => {
-		getBlockTypes().forEach( block => {
-			unregisterBlockType( block.name );
-		} );
-	} );
-
 	describe( 'getBeautifulContent()', () => {
 		it( 'returns beautiful content', () => {
 			const content = getBeautifulContent( '<div><div>Beautiful</div></div>' );
@@ -182,6 +175,7 @@ describe( 'block serializer', () => {
 	describe( 'serialize()', () => {
 		it( 'should serialize the post content properly', () => {
 			const blockType = {
+				name: 'core/test-block',
 				defaultAttributes: {
 					foo: true,
 					bar: false,
@@ -195,16 +189,15 @@ describe( 'block serializer', () => {
 					return <p dangerouslySetInnerHTML={ { __html: attributes.content } } />;
 				},
 			};
-			registerBlockType( 'core/test-block', blockType );
 
-			const block = createBlock( 'core/test-block', {
+			const block = createBlock( blockType, {
 				foo: false,
 				content: 'Ribs & Chicken',
 				stuff: 'left & right -- but <not>',
 			} );
 			const expectedPostContent = '<!-- wp:core/test-block {"foo":false,"stuff":"left \\u0026 right \\u002d\\u002d but \\u003cnot\\u003e"} -->\n<p class="wp-block-test-block">Ribs & Chicken</p>\n<!-- /wp:core/test-block -->';
 
-			expect( serialize( [ block ] ) ).toEqual( expectedPostContent );
+			expect( serialize( [ block ], { blockTypes: [ blockType ] } ) ).toEqual( expectedPostContent );
 		} );
 	} );
 } );

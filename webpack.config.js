@@ -42,6 +42,7 @@ const entryPointNames = [
 	'components',
 	'utils',
 	'blocks',
+	'block-api',
 	'date',
 	'editor',
 ];

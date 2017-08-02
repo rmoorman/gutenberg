@@ -12,8 +12,9 @@ import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
  */
 import { Children, Component } from '@wordpress/element';
 import { IconButton, Toolbar } from '@wordpress/components';
+import { getBlockDefaultClassname, getBlockType } from '@wordpress/block-api';
+import { withEditorSettings } from '@wordpress/blocks';
 import { keycodes } from '@wordpress/utils';
-import { getBlockType, getBlockDefaultClassname } from '@wordpress/blocks';
 import { __, sprintf } from '@wordpress/i18n';
 
 /**
@@ -306,9 +307,8 @@ class VisualEditorBlock extends Component {
 	}
 
 	render() {
-		const { block, multiSelectedBlockUids } = this.props;
-		const { name: blockName, isValid } = block;
-		const blockType = getBlockType( blockName );
+		const { block, multiSelectedBlockUids, blockType } = this.props;
+		const { isValid } = block;
 		// translators: %s: Type of block (i.e. Text, Image etc)
 		const blockLabel = sprintf( __( 'Block: %s' ), blockType.title );
 		// The block as rendered in the editor is composed of general block UI
@@ -433,7 +433,7 @@ class VisualEditorBlock extends Component {
 	}
 }
 
-export default connect(
+const connectComponent = connect(
 	( state, ownProps ) => {
 		return {
 			previousBlock: getPreviousBlock( state, ownProps.uid ),
@@ -508,4 +508,12 @@ export default connect(
 			dispatch( replaceBlocks( [ ownProps.uid ], blocks ) );
 		},
 	} )
-)( VisualEditorBlock );
+);
+
+const getEditorSettings = withEditorSettings( ( settings, ownProps ) => {
+	return {
+		blockType: getBlockType( ownProps.block.name, settings ),
+	};
+} );
+
+export default connectComponent( getEditorSettings( VisualEditorBlock ) );

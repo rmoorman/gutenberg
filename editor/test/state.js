@@ -7,7 +7,7 @@ import deepFreeze from 'deep-freeze';
 /**
  * WordPress dependencies
  */
-import { registerBlockType, unregisterBlockType } from '@wordpress/blocks';
+import { registerBlockType, unregisterBlockType, getBlockTypes } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -1082,6 +1082,9 @@ describe( 'state', () => {
 		it( 'should populate recently used blocks with the common category', () => {
 			const initial = userData( undefined, {
 				type: 'SETUP_EDITOR',
+				settings: {
+					blockTypes: getBlockTypes(),
+				},
 			} );
 
 			expect( initial.recentlyUsedBlocks ).toEqual( expect.arrayContaining( [ 'core/test-block', 'core/paragraph' ] ) );

@@ -8,12 +8,13 @@ import classnames from 'classnames';
  */
 import { __ } from '@wordpress/i18n';
 import { Placeholder, Dashicon, Toolbar, DropZone } from '@wordpress/components';
+import { query } from '@wordpress/block-api';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import { registerBlockType, query } from '../../api';
+import { registerBlockType } from '../../api';
 import Editable from '../../editable';
 import MediaUploadButton from '../../media-upload-button';
 import InspectorControls from '../../inspector-controls';

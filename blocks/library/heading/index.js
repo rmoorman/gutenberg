@@ -4,12 +4,13 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { concatChildren } from '@wordpress/element';
 import { Toolbar } from '@wordpress/components';
+import { query } from '@wordpress/block-api';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import { registerBlockType, createBlock, query } from '../../api';
+import { registerBlockType } from '../../api';
 import Editable from '../../editable';
 import BlockControls from '../../block-controls';
 import InspectorControls from '../../inspector-controls';
@@ -17,6 +18,7 @@ import AlignmentToolbar from '../../alignment-toolbar';
 import BlockDescription from '../../block-description';
 
 const { children, prop } = query;
+const createTransformationBlock = ( name, attributes ) => ( { name, attributes } );
 
 registerBlockType( 'core/heading', {
 	title: __( 'Heading' ),
@@ -42,7 +44,7 @@ registerBlockType( 'core/heading', {
 				type: 'block',
 				blocks: [ 'core/paragraph' ],
 				transform: ( { content } ) => {
-					return createBlock( 'core/heading', {
+					return createTransformationBlock( 'core/heading', {
 						content,
 					} );
 				},
@@ -61,7 +63,7 @@ registerBlockType( 'core/heading', {
 				transform: ( { content, match } ) => {
 					const level = match[ 1 ].length;
 
-					return createBlock( 'core/heading', {
+					return createTransformationBlock( 'core/heading', {
 						nodeName: `H${ level }`,
 						content,
 					} );
@@ -73,7 +75,7 @@ registerBlockType( 'core/heading', {
 				type: 'block',
 				blocks: [ 'core/paragraph' ],
 				transform: ( { content } ) => {
-					return createBlock( 'core/paragraph', {
+					return createTransformationBlock( 'core/paragraph', {
 						content,
 					} );
 				},
@@ -87,7 +89,7 @@ registerBlockType( 'core/heading', {
 		};
 	},
 
-	edit( { attributes, setAttributes, focus, setFocus, mergeBlocks, insertBlocksAfter } ) {
+	edit( { attributes, setAttributes, focus, setFocus, mergeBlocks } ) {
 		const { align, content, nodeName, placeholder } = attributes;
 
 		return [
@@ -140,13 +142,6 @@ registerBlockType( 'core/heading', {
 				onFocus={ setFocus }
 				onChange={ ( value ) => setAttributes( { content: value } ) }
 				onMerge={ mergeBlocks }
-				onSplit={ ( before, after, ...blocks ) => {
-					setAttributes( { content: before } );
-					insertBlocksAfter( [
-						...blocks,
-						createBlock( 'core/paragraph', { content: after } ),
-					] );
-				} }
 				style={ { textAlign: align } }
 				placeholder={ placeholder || __( 'Write heading…' ) }
 			/>,

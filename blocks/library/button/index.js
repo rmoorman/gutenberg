@@ -3,13 +3,14 @@
  */
 import { __ } from '@wordpress/i18n';
 import { IconButton } from '@wordpress/components';
+import { query } from '@wordpress/block-api';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
 import './block.scss';
-import { registerBlockType, query } from '../../api';
+import { registerBlockType } from '../../api';
 import Editable from '../../editable';
 import UrlInput from '../../url-input';
 import BlockControls from '../../block-controls';

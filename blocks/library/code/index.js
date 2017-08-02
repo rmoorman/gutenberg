@@ -7,12 +7,13 @@ import TextareaAutosize from 'react-autosize-textarea';
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { query } from '@wordpress/block-api';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import { registerBlockType, query, createBlock } from '../../api';
+import { registerBlockType } from '../../api';
 
 const { prop } = query;
 
@@ -32,7 +33,7 @@ registerBlockType( 'core/code', {
 			{
 				type: 'pattern',
 				regExp: /^```$/,
-				transform: () => createBlock( 'core/code' ),
+				transform: () => ( { name: 'core/code', attributes: {} } ),
 			},
 		],
 	},

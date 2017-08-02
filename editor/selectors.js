@@ -8,7 +8,7 @@ import createSelector from 'rememo';
 /**
  * WordPress dependencies
  */
-import { getBlockType } from '@wordpress/blocks';
+import { getBlockType } from '@wordpress/block-api';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -702,6 +702,17 @@ export function getNotices( state ) {
 }
 
 /**
+ *
+ * Returns the editor settings
+ *
+ * @param {Object} state Global application state
+ * @return {Object}      The editor settings
+ */
+export function getEditorSettings( state ) {
+	return state.editorSettings;
+}
+
+/**
  * Resolves the list of recently used block names into a list of block type settings.
  *
  * @param {Object} state Global application state
@@ -709,5 +720,6 @@ export function getNotices( state ) {
  */
 export function getRecentlyUsedBlocks( state ) {
 	// resolves the block names in the state to the block type settings
-	return state.userData.recentlyUsedBlocks.map( blockType => getBlockType( blockType ) );
+	return state.userData.recentlyUsedBlocks
+		.map( blockName => getBlockType( blockName, getEditorSettings( state ) ) );
 }

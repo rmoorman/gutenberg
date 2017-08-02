@@ -1,9 +1,15 @@
 /**
+ * WordPress dependencies
+ */
+import { __ } from 'i18n';
+import { query as hpq } from '@wordpress/block-api';
+
+/**
  * Internal dependencies
  */
 import './style.scss';
 import './block.scss';
-import { registerBlockType, query as hpq } from '../../api';
+import { registerBlockType } from '../../api';
 import TableBlock from './table-block';
 import BlockControls from '../../block-controls';
 import BlockAlignmentToolbar from '../../block-alignment-toolbar';
@@ -11,7 +17,7 @@ import BlockAlignmentToolbar from '../../block-alignment-toolbar';
 const { children } = hpq;
 
 registerBlockType( 'core/table', {
-	title: wp.i18n.__( 'Table' ),
+	title: __( 'Table' ),
 	icon: 'editor-table',
 	category: 'formatting',
 

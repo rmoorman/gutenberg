@@ -2,12 +2,13 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { query } from '@wordpress/block-api';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import { registerBlockType, query, setUnknownTypeHandler } from '../../api';
+import { registerBlockType, setUnknownTypeHandler } from '../../api';
 import OldEditor from './old-editor';
 
 const { prop } = query;

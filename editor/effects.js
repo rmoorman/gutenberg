@@ -7,7 +7,7 @@ import { get, uniqueId, debounce } from 'lodash';
 /**
  * WordPress dependencies
  */
-import { serialize, getBlockType, switchToBlockType } from '@wordpress/blocks';
+import { serialize, switchToBlockType, getBlockType } from '@wordpress/block-api';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -33,6 +33,7 @@ import {
 	isEditedPostDirty,
 	isEditedPostNew,
 	isEditedPostSaveable,
+	getEditorSettings,
 } from './selectors';
 
 export default {
@@ -41,9 +42,10 @@ export default {
 		const state = getState();
 		const post = getCurrentPost( state );
 		const edits = getPostEdits( state );
+		const editorSettings = getEditorSettings( state );
 		const toSend = {
 			...edits,
-			content: serialize( getBlocks( state ) ),
+			content: serialize( getBlocks( state ), editorSettings ),
 			id: post.id,
 		};
 		const transactionId = uniqueId();
@@ -178,9 +180,11 @@ export default {
 		store.dispatch( createErrorNotice( message ) );
 	},
 	MERGE_BLOCKS( action, store ) {
-		const { dispatch } = store;
+		const { dispatch, getState } = store;
+		const state = getState();
+		const editorSettings = getEditorSettings( state );
 		const [ blockA, blockB ] = action.blocks;
-		const blockType = getBlockType( blockA.name );
+		const blockType = getBlockType( blockA.name, editorSettings );
 
 		// Only focus the previous block if it's not mergeable
 		if ( ! blockType.merge ) {
@@ -192,7 +196,7 @@ export default {
 		// thus, we transform the block to merge first
 		const blocksWithTheSameType = blockA.name === blockB.name
 			? [ blockB ]
-			: switchToBlockType( blockB, blockA.name );
+			: switchToBlockType( blockB, blockA.name, editorSettings );
 
 		// If the block types can not match, do nothing
 		if ( ! blocksWithTheSameType || ! blocksWithTheSameType.length ) {

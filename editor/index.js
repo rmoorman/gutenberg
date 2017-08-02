@@ -10,9 +10,10 @@ import 'moment-timezone/moment-timezone-utils';
 /**
  * WordPress dependencies
  */
-import { EditableProvider, parse } from '@wordpress/blocks';
+import { EditableProvider, getBlockTypes, getUnknownTypeHandler, getDefaultBlock, getCategories } from '@wordpress/blocks';
+import { parse } from '@wordpress/block-api';
 import { render } from '@wordpress/element';
-import { settings } from '@wordpress/date';
+import { settings as dateSettings } from '@wordpress/date';
 
 /**
  * Internal dependencies
@@ -37,15 +38,15 @@ const DEFAULT_SETTINGS = {
 };
 
 // Configure moment globally
-moment.locale( settings.l10n.locale );
-if ( settings.timezone.string ) {
-	moment.tz.setDefault( settings.timezone.string );
+moment.locale( dateSettings.l10n.locale );
+if ( dateSettings.timezone.string ) {
+	moment.tz.setDefault( dateSettings.timezone.string );
 } else {
 	const momentTimezone = {
 		name: 'WP',
 		abbrs: [ 'WP' ],
 		untils: [ null ],
-		offsets: [ -settings.timezone.offset * 60 ],
+		offsets: [ -dateSettings.timezone.offset * 60 ],
 	};
 	const unpackedTimezone = moment.tz.pack( momentTimezone );
 	moment.tz.add( unpackedTimezone );
@@ -55,10 +56,11 @@ if ( settings.timezone.string ) {
 /**
  * Initializes Redux state with bootstrapped post, if provided.
  *
- * @param {Redux.Store} store Redux store instance
- * @param {Object}     post  Bootstrapped post object
+ * @param {Redux.Store} store    Redux store instance
+ * @param {Object}      post     Bootstrapped post object
+ * @param {Object}      settings Block Types settings
  */
-function preparePostState( store, post ) {
+function preparePostState( store, post, settings ) {
 	// Set current post into state
 	store.dispatch( {
 		type: 'RESET_POST',
@@ -69,7 +71,7 @@ function preparePostState( store, post ) {
 	if ( post.content.raw ) {
 		store.dispatch( {
 			type: 'RESET_BLOCKS',
-			blocks: parse( post.content.raw ),
+			blocks: parse( post.content.raw, settings ),
 		} );
 	}
 
@@ -93,10 +95,17 @@ function preparePostState( store, post ) {
  */
 export function createEditorInstance( id, post, editorSettings = DEFAULT_SETTINGS ) {
 	const store = createReduxStore();
+	const settings = {
+		...editorSettings,
+		blockTypes: getBlockTypes(),
+		fallbackBlockName: getUnknownTypeHandler(),
+		defaultBlockName: getDefaultBlock(),
+		categories: getCategories(),
+	};
 
 	store.dispatch( {
 		type: 'SETUP_EDITOR',
-		settings: editorSettings,
+		settings,
 	} );
 
 	if ( window.getUserSetting( 'gutenberg_tracking' ) === '' ) {
@@ -106,7 +115,7 @@ export function createEditorInstance( id, post, editorSettings = DEFAULT_SETTING
 		) );
 	}
 
-	preparePostState( store, post );
+	preparePostState( store, post, settings );
 
 	render(
 		<ReduxProvider store={ store }>
@@ -116,7 +125,7 @@ export function createEditorInstance( id, post, editorSettings = DEFAULT_SETTING
 						onUndo: undo,
 					}, store.dispatch ) }
 				>
-					<EditorSettingsProvider settings={ editorSettings }>
+					<EditorSettingsProvider settings={ settings }>
 						<Layout />
 					</EditorSettingsProvider>
 				</EditableProvider>

@@ -8,7 +8,8 @@ import { first, last } from 'lodash';
  * WordPress dependencies
  */
 import { IconButton } from '@wordpress/components';
-import { getBlockType } from '@wordpress/blocks';
+import { withEditorSettings } from '@wordpress/blocks';
+import { getBlockType } from '@wordpress/block-api';
 
 /**
  * Internal dependencies
@@ -56,12 +57,12 @@ function BlockMover( { onMoveUp, onMoveDown, isFirst, isLast, uids, blockType, f
 	);
 }
 
-export default connect(
+const connectComponent = connect(
 	( state, ownProps ) => ( {
 		isFirst: isFirstBlock( state, first( ownProps.uids ) ),
 		isLast: isLastBlock( state, last( ownProps.uids ) ),
 		firstIndex: getBlockIndex( state, first( ownProps.uids ) ),
-		blockType: getBlockType( getBlock( state, first( ownProps.uids ) ).name ),
+		name: getBlock( state, first( ownProps.uids ) ).name,
 	} ),
 	( dispatch, ownProps ) => ( {
 		onMoveDown() {
@@ -77,4 +78,12 @@ export default connect(
 			} );
 		},
 	} )
-)( BlockMover );
+);
+
+const getEditorSettings = withEditorSettings( ( settings, ownProps ) => {
+	return {
+		blockType: getBlockType( ownProps.name, settings ),
+	};
+} );
+
+export default connectComponent( getEditorSettings( BlockMover ) );

@@ -8,7 +8,8 @@ import Textarea from 'react-autosize-textarea';
  * WordPress dependencies
  */
 import { Component } from '@wordpress/element';
-import { serialize, parse } from '@wordpress/blocks';
+import { serialize, parse } from '@wordpress/block-api';
+import { withEditorSettings } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -18,9 +19,9 @@ import PostTitle from '../../post-title';
 import { getBlocks } from '../../selectors';
 
 class TextEditor extends Component {
-	constructor( { blocks } ) {
+	constructor( { blocks, settings } ) {
 		super( ...arguments );
-		const value = serialize( blocks );
+		const value = serialize( blocks, settings );
 		this.state = {
 			blocks,
 			persistedValue: value,
@@ -41,7 +42,7 @@ class TextEditor extends Component {
 		if ( this.state.value === this.state.persistedValue ) {
 			return;
 		}
-		const blocks = parse( this.state.value );
+		const blocks = parse( this.state.value, this.props.settings );
 		this.setState( {
 			blocks,
 		} );
@@ -51,7 +52,7 @@ class TextEditor extends Component {
 
 	componentWillReceiveProps( newProps ) {
 		if ( newProps.blocks !== this.state.blocks ) {
-			const value = serialize( newProps.blocks );
+			const value = serialize( newProps.blocks, newProps.settings );
 			this.setState( {
 				blocks: newProps.blocks,
 				persistedValue: value,
@@ -114,4 +115,4 @@ export default connect(
 			};
 		},
 	}
-)( TextEditor );
+)( withEditorSettings()( TextEditor ) );

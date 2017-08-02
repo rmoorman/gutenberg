@@ -10,29 +10,15 @@ import { text } from '../query';
 import {
 	getBlockAttributes,
 	parseBlockAttributes,
-	isValidBlock,
 	createBlockWithFallback,
 	default as parse,
 } from '../parser';
-import {
-	registerBlockType,
-	unregisterBlockType,
-	getBlockTypes,
-	getBlockType,
-	setUnknownTypeHandler,
-} from '../registration';
 
 describe( 'block parser', () => {
-	const defaultBlockSettings = {
+	const defaultBlockType = {
+		name: 'core/test-block',
 		save: ( { attributes } ) => attributes.fruit,
 	};
-
-	afterEach( () => {
-		setUnknownTypeHandler( undefined );
-		getBlockTypes().forEach( ( block ) => {
-			unregisterBlockType( block.name );
-		} );
-	} );
 
 	describe( 'parseBlockAttributes()', () => {
 		it( 'should use the function implementation', () => {
@@ -93,80 +79,77 @@ describe( 'block parser', () => {
 		} );
 	} );
 
-	describe( 'isValidBlock()', () => {
-		it( 'returns false is block is not valid', () => {
-			registerBlockType( 'core/test-block', defaultBlockSettings );
-
-			expect( isValidBlock(
-				'Apples',
-				getBlockType( 'core/test-block' ),
-				{ fruit: 'Bananas' }
-			) ).toBe( false );
-		} );
-
-		it( 'returns true is block is valid', () => {
-			registerBlockType( 'core/test-block', defaultBlockSettings );
-
-			expect( isValidBlock(
-				'Bananas',
-				getBlockType( 'core/test-block' ),
-				{ fruit: 'Bananas' }
-			) ).toBe( true );
-		} );
-	} );
-
 	describe( 'createBlockWithFallback', () => {
 		it( 'should create the requested block if it exists', () => {
-			registerBlockType( 'core/test-block', defaultBlockSettings );
-
 			const block = createBlockWithFallback(
 				'core/test-block',
 				'content',
-				{ attr: 'value' }
+				{ attr: 'value' },
+				{ blockTypes: [ defaultBlockType ] }
 			);
 			expect( block.name ).toEqual( 'core/test-block' );
 			expect( block.attributes ).toEqual( { attr: 'value' } );
 		} );
 
 		it( 'should create the requested block with no attributes if it exists', () => {
-			registerBlockType( 'core/test-block', defaultBlockSettings );
-
-			const block = createBlockWithFallback( 'core/test-block', 'content' );
+			const block = createBlockWithFallback(
+				'core/test-block',
+				'content',
+				undefined,
+				{ blockTypes: [ defaultBlockType ] }
+			);
 			expect( block.name ).toEqual( 'core/test-block' );
 			expect( block.attributes ).toEqual( {} );
 		} );
 
 		it( 'should fall back to the unknown type handler for unknown blocks if present', () => {
-			registerBlockType( 'core/unknown-block', defaultBlockSettings );
-			setUnknownTypeHandler( 'core/unknown-block' );
+			const unknownBlockType = {
+				...defaultBlockType,
+				name: 'core/unknown-block',
+			};
+			const config = {
+				blockTypes: [ unknownBlockType ],
+				fallbackBlockName: 'core/unknown-block',
+			};
 
 			const block = createBlockWithFallback(
 				'core/test-block',
 				'content',
-				{ attr: 'value' }
+				{ attr: 'value' },
+				config
 			);
 			expect( block.name ).toEqual( 'core/unknown-block' );
 			expect( block.attributes ).toEqual( { attr: 'value' } );
 		} );
 
 		it( 'should fall back to the unknown type handler if block type not specified', () => {
-			registerBlockType( 'core/unknown-block', defaultBlockSettings );
-			setUnknownTypeHandler( 'core/unknown-block' );
+			const unknownBlockType = {
+				...defaultBlockType,
+				name: 'core/unknown-block',
+			};
+			const config = {
+				blockTypes: [ unknownBlockType ],
+				fallbackBlockName: 'core/unknown-block',
+			};
 
-			const block = createBlockWithFallback( null, 'content' );
+			const block = createBlockWithFallback( null, 'content', undefined, config );
 			expect( block.name ).toEqual( 'core/unknown-block' );
 			expect( block.attributes ).toEqual( {} );
 		} );
 
 		it( 'should not create a block if no unknown type handler', () => {
-			const block = createBlockWithFallback( 'core/test-block', 'content' );
+			const config = {
+				blockTypes: [],
+			};
+			const block = createBlockWithFallback( 'core/test-block', 'content', undefined, config );
 			expect( block ).toBeUndefined();
 		} );
 	} );
 
 	describe( 'parse()', () => {
 		it( 'should parse the post content, including block attributes', () => {
-			registerBlockType( 'core/test-block', {
+			const testBlockType = {
+				name: 'core/test-block',
 				// Currently this is the only way to test block content parsing?
 				attributes: function( rawContent ) {
 					return {
@@ -174,12 +157,16 @@ describe( 'block parser', () => {
 					};
 				},
 				save: noop,
-			} );
+			};
+			const config = {
+				blockTypes: [ testBlockType ],
+			};
 
 			const parsed = parse(
 				'<!-- wp:core/test-block {"smoked":"yes","url":"http://google.com","chicken":"ribs & \'wings\'"} -->' +
 				'Brisket' +
-				'<!-- /wp:core/test-block -->'
+				'<!-- /wp:core/test-block -->',
+				config
 			);
 
 			expect( parsed ).toHaveLength( 1 );
@@ -194,25 +181,30 @@ describe( 'block parser', () => {
 		} );
 
 		it( 'should parse empty post content', () => {
-			const parsed = parse( '' );
+			const parsed = parse( '', { blockTypes: [] } );
 
 			expect( parsed ).toEqual( [] );
 		} );
 
 		it( 'should parse the post content, ignoring unknown blocks', () => {
-			registerBlockType( 'core/test-block', {
+			const blockType = {
+				name: 'core/test-block',
 				attributes: function( rawContent ) {
 					return {
 						content: rawContent + ' & Chicken',
 					};
 				},
 				save: noop,
-			} );
+			};
+			const config = {
+				blockTypes: [ blockType ],
+			};
 
 			const parsed = parse(
 				'<!-- wp:core/test-block -->\nRibs\n<!-- /wp:core/test-block -->' +
 				'<p>Broccoli</p>' +
-				'<!-- wp:core/unknown-block -->Ribs<!-- /wp:core/unknown-block -->'
+				'<!-- wp:core/unknown-block -->Ribs<!-- /wp:core/unknown-block -->',
+				config
 			);
 
 			expect( parsed ).toHaveLength( 1 );
@@ -224,15 +216,21 @@ describe( 'block parser', () => {
 		} );
 
 		it( 'should parse the post content, using unknown block handler', () => {
-			registerBlockType( 'core/test-block', defaultBlockSettings );
-			registerBlockType( 'core/unknown-block', defaultBlockSettings );
+			const unknownBlockType = {
+				...defaultBlockType,
+				name: 'core/unknown-block',
+			};
 
-			setUnknownTypeHandler( 'core/unknown-block' );
+			const config = {
+				blockTypes: [ defaultBlockType, unknownBlockType ],
+				fallbackBlockName: 'core/unknown-block',
+			};
 
 			const parsed = parse(
 				'<!-- wp:core/test-block -->Ribs<!-- /wp:core/test-block -->' +
 				'<p>Broccoli</p>' +
-				'<!-- wp:core/unknown-block -->Ribs<!-- /wp:core/unknown-block -->'
+				'<!-- wp:core/unknown-block -->Ribs<!-- /wp:core/unknown-block -->',
+				config
 			);
 
 			expect( parsed ).toHaveLength( 3 );
@@ -244,25 +242,28 @@ describe( 'block parser', () => {
 		} );
 
 		it( 'should parse the post content, including raw HTML at each end', () => {
-			registerBlockType( 'core/test-block', defaultBlockSettings );
-			registerBlockType( 'core/unknown-block', {
-				// Currently this is the only way to test block content parsing?
+			const unknownBlockType = {
+				name: 'core/unknown-block',
 				attributes: function( rawContent ) {
 					return {
 						content: rawContent,
 					};
 				},
 				save: noop,
-			} );
+			};
 
-			setUnknownTypeHandler( 'core/unknown-block' );
+			const config = {
+				blockTypes: [ defaultBlockType, unknownBlockType ],
+				fallbackBlockName: 'core/unknown-block',
+			};
 
 			const parsed = parse(
 				'<p>Cauliflower</p>' +
 				'<!-- wp:core/test-block -->Ribs<!-- /wp:core/test-block -->' +
 				'\n<p>Broccoli</p>\n' +
 				'<!-- wp:core/test-block -->Ribs<!-- /wp:core/test-block -->' +
-				'<p>Romanesco</p>'
+				'<p>Romanesco</p>',
+				config
 			);
 
 			expect( parsed ).toHaveLength( 5 );
@@ -279,9 +280,12 @@ describe( 'block parser', () => {
 		} );
 
 		it( 'should parse blocks with empty content', () => {
-			registerBlockType( 'core/test-block', defaultBlockSettings );
+			const config = {
+				blockTypes: [ defaultBlockType ],
+			};
 			const parsed = parse(
-				'<!-- wp:core/test-block --><!-- /wp:core/test-block -->'
+				'<!-- wp:core/test-block --><!-- /wp:core/test-block -->',
+				config
 			);
 
 			expect( parsed ).toHaveLength( 1 );
@@ -291,11 +295,17 @@ describe( 'block parser', () => {
 		} );
 
 		it( 'should parse void blocks', () => {
-			registerBlockType( 'core/test-block', defaultBlockSettings );
-			registerBlockType( 'core/void-block', defaultBlockSettings );
+			const voidBlockType = {
+				...defaultBlockType,
+				name: 'core/void-block',
+			};
+			const config = {
+				blockTypes: [ defaultBlockType, voidBlockType ],
+			};
 			const parsed = parse(
 				'<!-- wp:core/test-block --><!-- /wp:core/test-block -->' +
-				'<!-- wp:core/void-block /-->'
+				'<!-- wp:core/void-block /-->',
+				config
 			);
 
 			expect( parsed ).toHaveLength( 2 );

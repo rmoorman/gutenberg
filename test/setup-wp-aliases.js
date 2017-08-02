@@ -5,6 +5,7 @@
 	'components',
 	'utils',
 	'blocks',
+	'blocksapi',
 	'date',
 	'editor',
 ].forEach( entryPointName => {

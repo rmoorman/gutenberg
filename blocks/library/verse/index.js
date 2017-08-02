@@ -2,17 +2,19 @@
  * WordPress
  */
 import { __ } from '@wordpress/i18n';
+import { query } from '@wordpress/block-api';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import { registerBlockType, createBlock, query } from '../../api';
+import { registerBlockType } from '../../api';
 import Editable from '../../editable';
 import InspectorControls from '../../inspector-controls';
 import BlockDescription from '../../block-description';
 
 const { children } = query;
+const createTransformationBlock = ( name, attributes ) => ( { name, attributes } );
 
 registerBlockType( 'core/verse', {
 	title: __( 'Verse' ),
@@ -33,7 +35,7 @@ registerBlockType( 'core/verse', {
 				type: 'block',
 				blocks: [ 'core/paragraph' ],
 				transform: ( attributes ) =>
-					createBlock( 'core/verse', attributes ),
+					createTransformationBlock( 'core/verse', attributes ),
 			},
 		],
 		to: [
@@ -41,7 +43,7 @@ registerBlockType( 'core/verse', {
 				type: 'block',
 				blocks: [ 'core/paragraph' ],
 				transform: ( attributes ) =>
-					createBlock( 'core/paragraph', attributes ),
+					createTransformationBlock( 'core/paragraph', attributes ),
 			},
 		],
 	},
