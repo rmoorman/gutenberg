@@ -12,6 +12,7 @@ import classnames from 'classnames';
 import { __ } from 'i18n';
 import { Component } from 'element';
 import { ENTER } from 'utils/keycodes';
+import { BlockControls } from 'blocks';
 
 /**
  * Internal dependencies
@@ -92,7 +93,7 @@ class PostTitle extends Component {
 
 		return (
 			<div className={ className }>
-				{ isSelected && <PostPermalink /> }
+				{ isSelected && <BlockControls><PostPermalink /></BlockControls> }
 				<h1>
 					<Textarea
 						ref={ this.bindTextarea }

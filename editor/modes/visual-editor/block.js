@@ -3,7 +3,6 @@
  */
 import { connect } from 'react-redux';
 import classnames from 'classnames';
-import { Slot } from 'react-slot-fill';
 import { partial } from 'lodash';
 import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
 
@@ -13,7 +12,7 @@ import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
 import { Children, Component } from 'element';
 import { IconButton, Toolbar } from 'components';
 import { BACKSPACE, ESCAPE, DELETE, UP, DOWN, LEFT, RIGHT } from 'utils/keycodes';
-import { getBlockType, getBlockDefaultClassname } from 'blocks';
+import { getBlockType, getBlockDefaultClassname, BlockControls } from 'blocks';
 import { __, sprintf } from 'i18n';
 
 /**
@@ -369,6 +368,11 @@ class VisualEditorBlock extends Component {
 			>
 				{ ( showUI || isHovered ) && <BlockMover uids={ [ block.uid ] } /> }
 				{ ( showUI || isHovered ) && <BlockRightMenu uid={ block.uid } /> }
+				{ isSelected && (
+					<BlockControls>
+						<BlockSwitcher uid={ block.uid } />
+					</BlockControls>
+				) }
 				{ showUI && isValid &&
 					<CSSTransitionGroup
 						transitionName={ { appear: 'is-appearing', appearActive: 'is-appearing-active' } }
@@ -379,8 +383,6 @@ class VisualEditorBlock extends Component {
 						component={ FirstChild }
 					>
 						<div className="editor-visual-editor__block-controls">
-							<BlockSwitcher uid={ block.uid } />
-							<Slot name="Formatting.Toolbar" />
 							<Toolbar className="editor-visual-editor__mobile-tools">
 								{ ( showUI || isHovered ) && <BlockMover uids={ [ block.uid ] } /> }
 								{ ( showUI || isHovered ) && <BlockRightMenu uid={ block.uid } /> }

@@ -289,7 +289,6 @@
 
 .editor-visual-editor__block-controls {
 	display: flex;
-	position: sticky;
 	z-index: z-index( '.editor-visual-editor__block-controls' );
 	margin-top: -$block-controls-height - $item-spacing;
 	margin-bottom: $item-spacing + 20px;	// 20px is the offset from the bottom of the selected block where it stops sticking
@@ -477,4 +476,69 @@ $sticky-bottom-offset: 20px;
 		font-family: $default-font;
 		font-size: $default-font-size;
 	}
+}
+
+.editor-visual-editor__block-toolbar {
+	z-index: z-index( '.editor-visual-editor__block-toolbar' );
+	background: $white;
+	border-bottom: 1px solid $light-gray-500;
+	min-height: $admin-sidebar-width-collapsed;
+	top: $header-height;
+	left: 0;
+	right: 0;
+	position: sticky;
+
+	@include break-small() {
+		top: $admin-bar-height-big + $header-height;
+		position: fixed;
+	}
+
+	@include break-medium() {
+		top: $admin-bar-height + $header-height;
+	}
+}
+
+.sticky-menu .editor-visual-editor__block-toolbar {	/* Sticky is when on smaller breakpoints, nav menu is manually opened */
+	@include break-medium() {
+		left: $admin-sidebar-width;
+	}
+}
+
+.auto-fold .editor-visual-editor__block-toolbar {		/* Auto fold is when on smaller breakpoints, nav menu auto colllapses */
+	@include break-medium() {
+		left: $admin-sidebar-width-collapsed;
+	}
+
+	@include break-large() {
+		left: $admin-sidebar-width;
+	}
+}
+
+/* Sidebar manually collapsed */
+.folded .editor-visual-editor__block-toolbar {
+	left: $admin-sidebar-width-collapsed;
+}
+
+/* Mobile menu opened */
+.auto-fold .wp-responsive-open .editor-visual-editor__block-toolbar {
+	left: $admin-sidebar-width-big;
+	right: -$admin-sidebar-width-big;
+}
+
+/* RTL */
+.rtl.auto-fold .editor-visual-editor__block-toolbar {
+	@include break-medium() {
+		left: 0;
+		right: $admin-sidebar-width-collapsed;
+	}
+
+	@include break-large() {
+		left: 0;
+		right: $admin-sidebar-width;
+	}
+}
+
+.rtl.auto-fold .wp-responsive-open .editor-visual-editor__block-toolbar {
+	left: -$admin-sidebar-width-big;
+	right: $admin-sidebar-width-big;
 }
