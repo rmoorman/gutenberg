@@ -183,12 +183,22 @@ export default class Editable extends Component {
 				blocks = pasteHandler( childNodes );
 			}
 
-			if ( blocks.length ) {
-				// We must wait for TinyMCE to clean up paste containers after this
-				// event.
-				window.setTimeout( () => this.splitContent( blocks ), 0 );
-				event.preventDefault();
+			if ( ! blocks.length ) {
+				return;
 			}
+
+			// We must wait for TinyMCE to clean up paste containers after this event.
+			window.setTimeout( () => {
+				const rootNode = this.editor.getBody();
+
+				if ( this.editor.dom.isEmpty( rootNode ) && this.props.onReplace ) {
+					this.props.onReplace( blocks );
+				} else {
+					this.splitContent( blocks );
+				}
+			} );
+
+			event.preventDefault();
 		}
 	}
 
