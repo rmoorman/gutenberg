@@ -5,3 +5,5 @@ export { keycodes };
 export { nodetypes };
 
 export * from './tracking';
+
+export { default as fileUpload } from './fileupload';
