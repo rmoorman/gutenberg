@@ -171,7 +171,7 @@ registerBlockType( 'core/gallery', {
 
 		return (
 			<div className={ `align${ align } columns-${ columns } ${ imageCrop ? 'is-cropped' : '' }` } >
-				{ images && images.map( ( img ) => (
+				{ images.map( ( img ) => (
 					<GalleryImage key={ img.url } img={ img } linkTo={ linkTo } />
 				) ) }
 			</div>
