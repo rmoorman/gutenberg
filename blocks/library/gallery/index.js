@@ -168,9 +168,10 @@ registerBlockType( 'core/gallery', {
 
 	save( { attributes } ) {
 		const { images, columns = defaultColumnsNumber( attributes ), align = 'none', imageCrop = true, linkTo = 'none' } = attributes;
+
 		return (
 			<div className={ `align${ align } columns-${ columns } ${ imageCrop ? 'is-cropped' : '' }` } >
-				{ images.map( ( img ) => (
+				{ images && images.map( ( img ) => (
 					<GalleryImage key={ img.url } img={ img } linkTo={ linkTo } />
 				) ) }
 			</div>
