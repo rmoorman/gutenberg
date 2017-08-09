@@ -235,6 +235,8 @@ describe( 'Popover', () => {
 		} );
 
 		it( 'should render into provider context', () => {
+			const element = require( '@wordpress/element' );
+			jest.spyOn( element, 'createPortal' );
 			const target = document.createElement( 'div' );
 
 			mount(
@@ -243,7 +245,7 @@ describe( 'Popover', () => {
 				</PopoverProvider>
 			);
 
-			expect( target.childElementCount ).toBe( 1 );
+			expect( element.createPortal.mock.calls[ 0 ][ 1 ] ).toBe( target );
 		} );
 	} );
 } );
