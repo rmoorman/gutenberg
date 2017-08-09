@@ -86,10 +86,7 @@ function preparePostState( store, post ) {
 export function createEditorInstance( id, post, editorSettings = DEFAULT_SETTINGS ) {
 	const store = createReduxStore();
 
-	store.dispatch( {
-		type: 'SETUP_EDITOR',
-		settings: editorSettings,
-	} );
+	store.dispatch( { type: 'SETUP_EDITOR' } );
 
 	if ( window.getUserSetting( 'gutenberg_tracking' ) === '' ) {
 		store.dispatch( createInfoNotice( <EnableTrackingPrompt />, {
