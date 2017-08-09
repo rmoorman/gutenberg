@@ -10,7 +10,7 @@ import { Toolbar, Placeholder, FormFileUpload } from '@wordpress/components';
  */
 import './style.scss';
 import './block.scss';
-import { registerBlockType } from '../../api';
+import { registerBlockType, query as hpq } from '../../api';
 import MediaUploadButton from '../../media-upload-button';
 import InspectorControls from '../../inspector-controls';
 import RangeControl from '../../inspector-controls/range-control';
@@ -21,6 +21,7 @@ import BlockAlignmentToolbar from '../../block-alignment-toolbar';
 import GalleryImage from './gallery-image';
 import BlockDescription from '../../block-description';
 
+const { query, attr } = hpq;
 const MAX_COLUMNS = 8;
 const linkOptions = [
 	{ value: 'attachment', label: __( 'Attachment Page' ) },
@@ -68,8 +69,11 @@ registerBlockType( 'core/gallery', {
 	icon: 'format-gallery',
 	category: 'common',
 
-	defaultAttributes: {
-		images: [],
+	attributes: {
+		images: query( 'div.wp-block-gallery figure.blocks-gallery-image img', {
+			url: attr( 'src' ),
+			alt: attr( 'alt' ),
+		} ) || [],
 	},
 
 	getEditWrapperProps( attributes ) {
