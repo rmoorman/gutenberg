@@ -477,4 +477,8 @@ $sticky-bottom-offset: 20px;
 		font-family: $default-font;
 		font-size: $default-font-size;
 	}
+
+	.button + .button {
+		margin-left: $item-spacing;
+	}
 }
