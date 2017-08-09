@@ -1,12 +1,13 @@
 /**
  * External dependencies
  */
-import { shallow } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 
 /**
  * Internal dependencies
  */
 import { Popover } from '../';
+import PopoverProvider from '../provider';
 
 describe( 'Popover', () => {
 	describe( '#componentDidUpdate()', () => {
@@ -231,6 +232,18 @@ describe( 'Popover', () => {
 			const wrapper = shallow( <Popover isOpen>Hello</Popover> );
 
 			expect( wrapper.type() ).not.toBeNull();
+		} );
+
+		it( 'should render into provider context', () => {
+			const target = document.createElement( 'div' );
+
+			mount(
+				<PopoverProvider target={ target }>
+					<Popover isOpen>Hello</Popover>
+				</PopoverProvider>
+			);
+
+			expect( target.childElementCount ).toBe( 1 );
 		} );
 	} );
 } );

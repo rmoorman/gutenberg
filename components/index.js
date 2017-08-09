@@ -22,6 +22,7 @@ export { default as Spinner } from './spinner';
 export { default as Toolbar } from './toolbar';
 export { default as DropdownMenu } from './dropdown-menu';
 export { default as Popover } from './popover';
+export { default as PopoverProvider } from './popover/provider';
 
 // Higher-Order Components
 export { default as withFocusReturn } from './higher-order/with-focus-return';

@@ -2,7 +2,7 @@
  * External dependencies
  */
 import classnames from 'classnames';
-import { isEqual, pickBy } from 'lodash';
+import { isEqual, pickBy, noop } from 'lodash';
 
 /**
  * WordPress dependencies
@@ -149,6 +149,7 @@ export class Popover extends Component {
 			return null;
 		}
 
+		const { popoverTarget = document.body } = this.context;
 		const eventHandlers = pickBy( this.props, ( value, key ) => (
 			'onClose' !== key && REGEXP_EVENT_PROP.test( key )
 		) );
@@ -178,11 +179,15 @@ export class Popover extends Component {
 							</div>
 						</div>
 					</PopoverDetectOutside>,
-					document.body
+					popoverTarget
 				) }
 			</span>
 		);
 	}
 }
+
+Popover.contextTypes = {
+	popoverTarget: noop,
+};
 
 export default Popover;
