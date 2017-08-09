@@ -6,4 +6,4 @@ export { nodetypes };
 
 export * from './tracking';
 
-export { default as fileUpload } from './fileupload';
+export * from './fileupload';
