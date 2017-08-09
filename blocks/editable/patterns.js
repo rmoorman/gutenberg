@@ -49,7 +49,13 @@ export default function( editor ) {
 	} );
 
 	editor.on( 'pastepostprocess', () => {
-		setTimeout( () => searchFirstText( pastePatterns ) );
+		setTimeout( () => {
+			if ( editor.removed ) {
+				return;
+			}
+
+			searchFirstText( pastePatterns );
+		} );
 	} );
 
 	editor.on( 'keydown', function( event ) {

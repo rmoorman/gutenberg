@@ -189,6 +189,10 @@ export default class Editable extends Component {
 
 			// We must wait for TinyMCE to clean up paste containers after this event.
 			window.setTimeout( () => {
+				if ( this.editor.removed ) {
+					return;
+				}
+
 				const rootNode = this.editor.getBody();
 
 				if ( this.editor.dom.isEmpty( rootNode ) && this.props.onReplace ) {
