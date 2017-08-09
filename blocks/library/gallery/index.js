@@ -2,7 +2,8 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Toolbar, Placeholder } from '@wordpress/components';
+import { filesUpload } from '@wordpress/utils';
+import { Toolbar, Placeholder, FormFileUpload } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -87,6 +88,10 @@ registerBlockType( 'core/gallery', {
 		const { linkTo = 'none' } = attributes;
 		const toggleImageCrop = () => setAttributes( { imageCrop: ! imageCrop } );
 
+		const uploadFromFiles = ( event ) => {
+			filesUpload( event.target.files, setAttributes );
+		};
+
 		const controls = (
 			focus && (
 				<BlockControls key="controls">
@@ -117,6 +122,15 @@ registerBlockType( 'core/gallery', {
 					icon="format-gallery"
 					label={ __( 'Gallery' ) }
 					className={ className }>
+					<FormFileUpload
+						isLarge
+						className="wp-block-image__upload-button"
+						onChange={ uploadFromFiles }
+						accept="image/*"
+						multiple="true"
+					>
+						{ __( 'Upload' ) }
+					</FormFileUpload>
 					<MediaUploadButton
 						buttonProps={ uploadButtonProps }
 						onSelect={ setMediaUrl }
